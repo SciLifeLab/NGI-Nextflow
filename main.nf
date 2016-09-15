@@ -407,7 +407,7 @@ process dupradar {
     stranded <- 2
     threads <- 8
     dm <- analyzeDuprates("${bam_md}", "${gtf}", stranded, $paired, threads)
-    write.table(dm, file=paste("${bam_md}", "_dupMatrix.txt", sep=""), quote=F, row.name=F, sep="\t")
+    write.table(dm, file=paste("${bam_md}", "_dupMatrix.txt", sep=""), quote=F, row.name=F, sep="\\t")
     
     # 2D density scatter plot
     pdf(paste0("${bam_md}", "_duprateExpDens.pdf"))
@@ -578,12 +578,12 @@ process sample_correlation {
     dev.off()
  
     # Print distance matrix to file
-    write.table(MDSdata\$distance.matrix, 'edgeR_MDS_distance_matrix.txt', quote=FALSE, sep="\t")
+    write.table(MDSdata\$distance.matrix, 'edgeR_MDS_distance_matrix.txt', quote=FALSE, sep="\\t")
  
     # Print plot x,y co-ordinates to file
     MDSxy = MDSdata\$cmdscale.out
     colnames(MDSxy) = c(paste(MDSdata\$axislabel, '1'), paste(MDSdata\$axislabel, '2'))
-    write.table(MDSxy, 'edgeR_MDS_plot_coordinates.txt', quote=FALSE, sep="\t")
+    write.table(MDSxy, 'edgeR_MDS_plot_coordinates.txt', quote=FALSE, sep="\\t")
  
     # Get the log counts per million values
     logcpm <- cpm(dataNorm, prior.count=2, log=TRUE)
@@ -605,7 +605,7 @@ process sample_correlation {
     dev.off()
  
     # Write clustered distance values to file
-    write.table(hmap\$carpet, 'log2CPM_sample_distances.txt', quote=FALSE, sep="\t")
+    write.table(hmap\$carpet, 'log2CPM_sample_distances.txt', quote=FALSE, sep="\\t")
     
     file.create("corr.done")
     """
