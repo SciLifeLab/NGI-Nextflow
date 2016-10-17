@@ -1,7 +1,10 @@
-# RNA-BP
-Pipeline for RNA sequencing best practice analysis at the NGI at Scilifelab Stockholm, Sweden
+# NGI-RNAseq
+Pipeline for RNA sequencing best practice analysis at the [National Genomics Infastructure](https://ngisweden.scilifelab.se/)
+at [SciLifeLab Stockholm](https://www.scilifelab.se/platforms/ngi/), Sweden.
 
-Written by Phil Ewels (@ewels) and Rickard Hammarén (@Hammarn)
+## Pipeline Results
+See the [pipeline documentation](https://github.com/SciLifeLab/NGI-RNAseq/blob/master/Docs/README.md)
+for explanations of the results files.
 
 ## Installation
 ### NextFlow installation
@@ -13,8 +16,7 @@ of NextFlow looks like this:
 curl -fsSL get.nextflow.io | bash
 mv ./nextflow ~/bin
 ```
-Note that if you're running on the Swedish UPPMAX cluster (Milou) you can load NextFlow as an
-environment module:
+Note that if you're running on a Swedish UPPMAX you can load NextFlow as an environment module:
 ```
 module load nextflow
 ```
@@ -108,3 +110,9 @@ Use `--strandRule 'none'` if your data is not strand specific.
 Specify the path to a specific config file (this is a core NextFlow command). Useful if using different UPPMAX
 projects or different sets of reference genomes.
 
+## Credits
+These scripts were written for use at the [National Genomics Infrastructure](https://portal.scilifelab.se/genomics/)
+at [SciLifeLab](http://www.scilifelab.se/) in Stockholm, Sweden.
+Written by Phil Ewels (@ewels) and Rickard Hammarén (@Hammarn).
+
+<p align="center"><a href="stand_alone/http://www.scilifelab.se/" target="_blank"><img src="Docs/images/SciLifeLab_logo.png" title="SciLifeLab"></a></p>
