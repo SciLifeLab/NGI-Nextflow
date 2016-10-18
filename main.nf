@@ -78,6 +78,38 @@ def single
 params.sampleLevel = false
 params.strandRule = false
 
+if(params.pbat){
+    params.clip_r1 = 6
+    params.clip_r2 = 6
+    params.three_prime_clip_r1 = 0
+    params.three_prime_clip_r2 = 0
+} else if(params.single_cell){
+    params.clip_r1 = 9
+    params.clip_r2 = 9
+    params.three_prime_clip_r1 = 0
+    params.three_prime_clip_r2 = 0
+} else if(params.epignome){
+    params.clip_r1 = 6
+    params.clip_r2 = 6
+    params.three_prime_clip_r1 = 6
+    params.three_prime_clip_r2 = 6
+} else if(params.accel){
+    params.clip_r1 = 10
+    params.clip_r2 = 15
+    params.three_prime_clip_r1 = 10
+    params.three_prime_clip_r2 = 10
+} else if(params.cegx){
+    params.clip_r1 = 6
+    params.clip_r2 = 6
+    params.three_prime_clip_r1 = 2
+    params.three_prime_clip_r2 = 2
+} else {
+    params.clip_r1 = 0
+    params.clip_r2 = 0
+    params.three_prime_clip_r1 = 0
+    params.three_prime_clip_r2 = 0
+}
+
 log.info "===================================="
 log.info " NGI-RNAseq : RNA-Seq Best Practice v${version}"
 log.info "===================================="
@@ -152,39 +184,43 @@ process fastqc {
  */
 process trim_galore {
     tag "$prefix"
-
+    
     module 'bioinfo-tools'
     module 'TrimGalore'
-
+    
     cpus 3
     memory { 3.GB * task.attempt }
     time { 16.h * task.attempt }
     errorStrategy { task.exitStatus == 143 ? 'retry' : 'terminate' }
     maxRetries 3
     maxErrors '-1'
-
+    
     publishDir "${params.outdir}/trim_galore", mode: 'copy'
-
+    
     input:
     set val(prefix), file(reads:'*') from read_files_trimming
-
+    
     output:
     file '*fq.gz' into trimmed_reads
     file '*trimming_report.txt' into trimgalore_results
-
+    
     script:
     single = reads instanceof Path
-    if(single) {
+    c_r1 = params.clip_r1 > 0 ? "--clip_r1 ${params.clip_r1}" : ''
+    c_r2 = params.clip_r2 > 0 ? "--clip_r2 ${params.clip_r2}" : ''
+    tpc_r1 = params.three_prime_clip_r1 > 0 ? "--three_prime_clip_r1 ${params.three_prime_clip_r1}" : ''
+    tpc_r2 = params.three_prime_clip_r2 > 0 ? "--three_prime_clip_r2 ${params.three_prime_clip_r2}" : ''
+    rrbs = params.rrbs ? "--rrbs" : ''
+    if (single) {
         """
-        trim_galore --gzip $reads
+        trim_galore --gzip $rrbs $c_r1 $c_r2 $tpc_r1 $tpc_r2 $reads
         """
     } else {
         """
-        trim_galore --paired --gzip $reads
+        trim_galore --paired --gzip $rrbs $c_r1 $c_r2 $tpc_r1 $tpc_r2 $reads
         """
     }
 }
-
 
 
 /*
