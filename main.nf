@@ -53,7 +53,6 @@ as single end.
 */
 
 
-
 /*
  * SET UP CONFIGURATION VARIABLES
  */
@@ -149,6 +148,51 @@ Channel
 
 read_files.into { read_files_fastqc; read_files_trimming; name_for_star }
 
+
+/*
+ * Pre-flight check
+ */
+
+process check-dependencies{
+    
+    module 'bioinfo-tools'
+    module 'FastQC'
+    module 'TrimGalore'
+    module 'star'
+    module 'rseqc'
+    module 'samtools'
+    module 'picard/2.0.1'
+    module 'R/3.2.3'
+    module 'StringTie'
+    module 'multiqc'
+    
+    errorStrategy 'terminate' 
+
+    memory '1GB'
+    time '0.5h'
+    
+    input:
+    ############### Is this needed?
+    
+    output:
+    file 'versions.txt' 
+
+    """
+    fastqc > versions.txt
+    trim_galore >> versions.txt
+    STAR >> versions.txt
+    samtools >> version.txt
+    rseqc???????? >>v ersions.txt
+    preseq >> versions.txt
+    echo "File name: $bam_markduplicates Picard version "\$(java -Xmx2g -jar \$PICARD_HOME/picard.jar  MarkDuplicates --version 2>> versions.txt)
+    featureCounts >> version.txt 
+    echo "File name: $bam_stringtieFPKM Stringtie version "\$(stringtie --version) >> versions.txt
+    multiqc --version >> versions.txt
+    """
+}
+
+//Some check?
+//Some check?  
 
 /*
  * STEP 1 - FastQC
@@ -536,9 +580,7 @@ process dupradar {
     citation("dupRadar")
     sessionInfo()
     """
-
 }
-
 
 
 /*
