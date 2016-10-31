@@ -1,5 +1,5 @@
 #!/bin/bash -l
-#SBATCH -A YOUR-project
+#SBATCH -A b2013064 
 #SBATCH -p core
 #SBATCH -n 4
 #SBATCH -t 24:00:00
@@ -20,13 +20,10 @@ bwa="/sw/data/uppnex/igenomes/Homo_sapiens/Ensembl/GRCh37/Sequence/BWAIndex/geno
 fasta="/sw/data/uppnex/igenomes/Homo_sapiens/Ensembl/GRCh37/Sequence/WholeGenomeFasta"
 gtf="/sw/data/uppnex/igenomes/Homo_sapiens/Ensembl/GRCh37/Annotation/Genes/genes.gtf"
 star="/sw/data/uppnex/igenomes/Homo_sapiens/Ensembl/GRCh37/Sequence/STARIndex/"
-################## Loading modules
+#################### SeQC
+echo Starting RSEQC
 module load bioinfo-tools
 module load rseqc
-module load preseq
-module load StringTie
-module load picard
-#################### SeQC
 samtools index $bam
 infer_experiment.py -i $bam -r $bed12 > $bam.infer_experiment.txt
 RPKM_saturation.py -i $bam -r $bed12 -d $strandRule -o $bam.RPKM_saturation
@@ -38,9 +35,14 @@ geneBody_coverage.py -i $bam -o $bam.rseqc -r $bed12
 read_distribution.py -i $bam -r $bed12 > $bam.read_distribution.txt
 read_duplication.py -i $bam -o $bam.read_duplication
 ################### preseq
- preseq lc_extrap -v -B $bam -o $bam.ccurve.txt
+echo Starting preseq
+module unload rseqc
+module load preseq
+preseq lc_extrap -v -B $bam -o $bam.ccurve.txt
 ################## MarkDuplicates
-java -Xmx2g -jar $PICARD_HOME/picard.jar MarkDuplicates \
+module unload preseq
+module load picard
+java -Xmx2g -jar $PICARD_HOME/picard-1.118.jar MarkDuplicates \
  INPUT=$bam_markduplicates \
  OUTPUT=$bam_markduplicates.markDups.bam \
  METRICS_FILE=$bam_markduplicates.markDups_metrics.txt \
@@ -49,10 +51,14 @@ java -Xmx2g -jar $PICARD_HOME/picard.jar MarkDuplicates \
  PROGRAM_RECORD_ID=null \
  VALIDATION_STRINGENCY=LENIENT
 ################## Featurecounts
+module unload picard
+module load subread
 featureCounts -a $gtf -g gene_id -o $bam_gene.featureCounts.txt -p -s 2 $bam
 featureCounts -a $gtf -g gene_biotype -o $bam_biotype.featureCounts.txt -p -s 2 $bam
 cut -f 1,7 $bam_biotype.featureCounts.txt > $bam_biotype_counts.txt
 ################# Stringtie
+moduel unload StringTie
+module load StringTie
 stringtie $bam \
  -o $bam_transcripts.gtf \
  -v \
