@@ -77,37 +77,12 @@ def single
 params.sampleLevel = false
 params.strandRule = false
 
-if(params.pbat){
-    params.clip_r1 = 6
-    params.clip_r2 = 6
-    params.three_prime_clip_r1 = 0
-    params.three_prime_clip_r2 = 0
-} else if(params.single_cell){
-    params.clip_r1 = 9
-    params.clip_r2 = 9
-    params.three_prime_clip_r1 = 0
-    params.three_prime_clip_r2 = 0
-} else if(params.epignome){
-    params.clip_r1 = 6
-    params.clip_r2 = 6
-    params.three_prime_clip_r1 = 6
-    params.three_prime_clip_r2 = 6
-} else if(params.accel){
-    params.clip_r1 = 10
-    params.clip_r2 = 15
-    params.three_prime_clip_r1 = 10
-    params.three_prime_clip_r2 = 10
-} else if(params.cegx){
-    params.clip_r1 = 6
-    params.clip_r2 = 6
-    params.three_prime_clip_r1 = 2
-    params.three_prime_clip_r2 = 2
-} else {
-    params.clip_r1 = 0
-    params.clip_r2 = 0
-    params.three_prime_clip_r1 = 0
-    params.three_prime_clip_r2 = 0
-}
+// Initializing - custom trimming options
+params.clip_r1 = 0
+params.clip_r2 = 0
+params.three_prime_clip_r1 = 0
+params.three_prime_clip_r2 = 0
+
 
 log.info "===================================="
 log.info " NGI-RNAseq : RNA-Seq Best Practice v${version}"
@@ -123,6 +98,11 @@ log.info "R libraries  : ${params.rlocation}"
 log.info "Script dir   : $baseDir"
 log.info "Working dir  : $workDir"
 log.info "Output dir   : ${params.outdir}"
+log.info "Output dir   : ${params.outdir}"
+log.info "Trim R1      : ${params.clip_r1}"
+log.info "Trim R2      : ${params.clip_r2}"
+log.info "Trim 3' R1   : ${params.three_prime_clip_r1}"
+log.info "Trim 3' R2   : ${params.three_prime_clip_r2}"
 log.info "===================================="
 
 // Validate inputs
@@ -147,52 +127,6 @@ Channel
     .set { read_files }
 
 read_files.into { read_files_fastqc; read_files_trimming; name_for_star }
-
-
-/*
- * Pre-flight check
- */
-
-process check-dependencies{
-    
-    module 'bioinfo-tools'
-    module 'FastQC'
-    module 'TrimGalore'
-    module 'star'
-    module 'rseqc'
-    module 'samtools'
-    module 'picard/2.0.1'
-    module 'R/3.2.3'
-    module 'StringTie'
-    module 'multiqc'
-    
-    errorStrategy 'terminate' 
-
-    memory '1GB'
-    time '0.5h'
-    
-    input:
-    ############### Is this needed?
-    
-    output:
-    file 'versions.txt' 
-
-    """
-    fastqc > versions.txt
-    trim_galore >> versions.txt
-    STAR >> versions.txt
-    samtools >> version.txt
-    rseqc???????? >>v ersions.txt
-    preseq >> versions.txt
-    echo "File name: $bam_markduplicates Picard version "\$(java -Xmx2g -jar \$PICARD_HOME/picard.jar  MarkDuplicates --version 2>> versions.txt)
-    featureCounts >> version.txt 
-    echo "File name: $bam_stringtieFPKM Stringtie version "\$(stringtie --version) >> versions.txt
-    multiqc --version >> versions.txt
-    """
-}
-
-//Some check?
-//Some check?  
 
 /*
  * STEP 1 - FastQC
