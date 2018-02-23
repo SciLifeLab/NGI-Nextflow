@@ -755,7 +755,8 @@ process rseqc {
 
     output:
     file "*.{txt,pdf,r,xls}" into rseqc_results
-
+    stdout                   into ch_rseqcLog_forSoftVersion
+  
     script:
     def strandRule = ''
     if (forward_stranded && !unstranded){
@@ -1047,7 +1048,7 @@ process sample_correlation {
  */
 software_versions = [
   'FastQC': null, 'Trim Galore!': null, 'Star': null, 'HISAT2': null, 'StringTie': null,
-  'Preseq': null, 'featureCounts': null, 'dupRadar': null, 'Picard MarkDuplicates': null,
+  'RSeQC': null, 'Preseq': null, 'featureCounts': null, 'dupRadar': null, 'Picard MarkDuplicates': null,
   'Nextflow': "v$workflow.nextflow.version"
 ]
 if(params.aligner == 'star') software_versions.remove('HISAT2')
@@ -1063,6 +1064,7 @@ process get_software_versions {
     val star from star_log.collect()
     val stringtie from stringtie_stdout.collect()
     val hisat from hisat_stdout.collect()
+    val rseqc from ch_rseqcLog_forSoftVersion.collect()
     val preseq from preseq_stdout.collect()
     val featurecounts from featurecounts_stdout.collect()
     val dupradar from dupradar_stdout.collect()
@@ -1077,6 +1079,7 @@ process get_software_versions {
     if(params.aligner == 'star') software_versions['Star'] = star[0].getText().find(/STAR_(\d+\.\d+\.\d+)/) { match, version -> "v$version" }
     else if(params.aligner == 'hisat2') software_versions['HISAT2'] = hisat[0].getText().find(/hisat2\S+ version (\S+)/) { match, version -> "v$version" }
     software_versions['StringTie'] = stringtie[0].getText().find(/StringTie (\S+)/) { match, version -> "v"+version.replaceAll(/\.$/, "") }
+    software_versions['RSeQC'] = rseqc[0].find(/read_duplication.py (\S+)/) { match, version -> "v$version" }  
     software_versions['Preseq'] = preseq[0].getText().find(/Version: (\S+)/) { match, version -> "v$version" }
     software_versions['featureCounts'] = featurecounts[0].getText().find(/\s+v([\.\d]+)/) {match, version -> "v$version"}
     software_versions['dupRadar'] = dupradar[0].getText().find(/dupRadar\_(\S+)/) {match, version -> "v$version"}
