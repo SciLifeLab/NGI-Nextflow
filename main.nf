@@ -1176,6 +1176,17 @@ workflow.onComplete {
     if(workflow.revision) email_fields['summary']['Pipeline Git branch/tag'] = workflow.revision
     if(workflow.container) email_fields['summary']['Docker image'] = workflow.container
     email_fields['skipped_poor_alignment'] = skipped_poor_alignment
+    
+    // On success try attach the multiqc report
+    def mqc_report = null
+    def find_mqc_report = {it.eachFileMatch(~/.*multiqc_report.html/) {mqc_report = it}}
+    try {
+        if (workflow.success) {
+            find_mqc_report(new File("${params.outdir}/MultiQC/"))
+        }
+    } catch (all) {
+        // complain nothing just move on
+    }
 
     // Render the TXT template
     def engine = new groovy.text.GStringTemplateEngine()
@@ -1189,7 +1200,7 @@ workflow.onComplete {
     def email_html = html_template.toString()
 
     // Render the sendmail template
-    def smail_fields = [ email: params.email, subject: subject, email_txt: email_txt, email_html: email_html, baseDir: "$baseDir" ]
+    def smail_fields = [ email: params.email, subject: subject, email_txt: email_txt, email_html: email_html, baseDir: "$baseDir", mqcFile: mqc_report ]
     def sf = new File("$baseDir/assets/sendmail_template.txt")
     def sendmail_template = engine.createTemplate(sf).make(smail_fields)
     def sendmail_html = sendmail_template.toString()
