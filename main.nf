@@ -934,7 +934,8 @@ process featureCounts {
     featureCounts -a $gtf -g gene_id -o ${bam_featurecounts.baseName}_gene.featureCounts.txt -p -s $featureCounts_direction $bam_featurecounts
     featureCounts -a $gtf -g gene_biotype -o ${bam_featurecounts.baseName}_biotype.featureCounts.txt -p -s $featureCounts_direction $bam_featurecounts
     cut -f 1,7 ${bam_featurecounts.baseName}_biotype.featureCounts.txt | tail -n +3 | cat $biotypes_header - >> ${bam_featurecounts.baseName}_biotype_counts_mqc.txt
-    awk 'BEGIN{FS="\t"; print "Sample\tpercent_rRNA"}(\$0 !~ /^#/){total_count += \$2; if(\$1 == "rRNA"){rna_count=\$2}}END{print \"$sample_name\" FS (rna_count/total_count)*100;}' ${bam_featurecounts.baseName}_biotype_counts_mqc.txt | cat $biotypes_gs_header - > ${bam_featurecounts.baseName}_biotype_counts_gs_mqc.tsv
+    awk 'BEGIN{FS="\t"; print "Sample\tpercent_rRNA"}(\$0 !~ /^#/){total_count += \$2; if(\$1 == "rRNA"){rna_count=\$2}}END{print \"$sample_name\" FS (rna_count/total_count)*100;}' \
+        ${bam_featurecounts.baseName}_biotype_counts_mqc.txt | cat $biotypes_gs_header - > ${bam_featurecounts.baseName}_biotype_counts_gs_mqc.tsv
     """
 }
 
